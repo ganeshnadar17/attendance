@@ -34,7 +34,7 @@
 		<input type="file" name="fileToUpload" class="form-control-file" id="exampleInputFile" aria-describedby="fileHelp">
 	</div>
 	<div>
-		<p><?php  
+		<p name="fileToUpload1"><?php  
 			$image = $edit_movie_list[0]['movie_image']; 
 			$img= "http://localhost/ci/uploads/".$image;
 			echo '<img src="'.$img.'" style="width:50px;height:60px">';

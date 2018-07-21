@@ -20,12 +20,7 @@ class Login_model extends CI_Model{
         // Run the query
         $query = $this->db->get('login_data');
 		$row = $query->row();
-		#$query = $this->db->query('SELECT * FROM gopal_test.login_data WHERE user_name = "'.$username.'" AND password = "'.$password.'"');
-		#echo $query->num_rows;
-		#echo "<pre>";
-		#print_r($query->row());
-		#exit;
-		#echo  $this->db->last_query();	
+		
         // Let's check if there are any results
 		if($row)
         #if(1 == 1)
@@ -52,19 +47,11 @@ class Login_model extends CI_Model{
 		$query = $this->db->get("artical");
 		$result = $query->result_array();
 
-		#$query = $this->db->query('SELECT artical_user FROM gopal_test.artical WHERE user_id = "'.$user_id.'"');
-		#$artical = array();
-		#while($records = $query->row()){
-		#	$artical[] = $records;
-		#	$records= "";
-			
-		#}
 		return $result;
 	}
 	
 		public function save_artical($user_id){
 		$artical = $this->input->post("artical_data");
-		#$query = "insert into artical (artical_user) values ('$artical')";
 		$query = $this->db->query("Insert into artical (user_id, artical_user) values ($user_id, '$artical')");
 		return true;
 	}
@@ -95,9 +82,7 @@ class Login_model extends CI_Model{
 	}
 	
 	public function save_per_data(){
-		#print_r($_POST);
-		#print_r($_FILES);
-		#exit;
+		
 		$data['name'] = $this->input->post("name");
 		$data['address'] = $this->input->post("address");
 		$data['emailid'] = $this->input->post("email_id");
@@ -105,58 +90,15 @@ class Login_model extends CI_Model{
 		$data['age'] = $this->input->post("age");
 		$data['language'] = implode("|", $this->input->post("language"));
 		$data['gender'] = $this->input->post("gender");
-		$time = time();
 		$user_id = $this->session->userdata('userid');
-		
-		$target_dir = "uploads/";
-		$upload_image = md5($time.$user_id).".".strtolower(pathinfo($_FILES["fileToUpload"]['name'],PATHINFO_EXTENSION));
-		$target_file = $target_dir . $upload_image;
-		$uploadOk = 1;
-		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-		// Check if image file is a actual image or fake image
-		if(!$imageFileType) {
-			$check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
-			if($check !== false) {
-				echo "File is an image - " . $check["mime"] . ".";
-				$uploadOk = 1;
-			} else {
-				echo "File is not an image.";
-				$uploadOk = 0;
+		if(($_FILES['fileToUpload']['name']) != ''){
+			$upload = $this->upload_file($_FILES, $user_id);
+			if($upload["err_code"] == 0){
+				print($upload["err_msg"]);
 				exit;
 			}
+			$data['upload_image'] = $upload['file_name'];
 		}
-		// Check if file already exists
-		if (file_exists($target_file)) {
-			echo "Sorry, file already exists.";
-			$uploadOk = 0;
-			exit;
-		}
-		// Check file size
-		if ($_FILES["fileToUpload"]["size"] > 5000000) {
-			echo "Sorry, your file is too large.";
-			$uploadOk = 0;
-			exit;
-		}
-		// Allow certain file formats
-		if($imageFileType != "jpg") {
-			echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
-			$uploadOk = 0;
-			exit;
-		}
-		// Check if $uploadOk is set to 0 by an error
-		if ($uploadOk == 0) {
-			echo "Sorry, your file was not uploaded.";
-			exit;
-		// if everything is ok, try to upload file
-		} else {
-			if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-				echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
-				$data['upload_image'] = $upload_image;
-			} else {
-				echo "Sorry, there was an error uploading your file.";
-			}
-		}
-		$data['user_id'] = $this->session->userdata('userid');
 		$this->db->insert('per_data', $data);
 		#print_r ($this->db->last_query());
 		#exit;
@@ -183,74 +125,28 @@ class Login_model extends CI_Model{
 	}
 	
 	public function personal_update_data(){
-		#print_r($_POST);
-		$time = time();
-		$user_id = $this->session->userdata('userid');
-		
-		#echo md5($time.$user_id);
-		#exit;
+		#print_r($_POST);	
 		$data['name'] = $this->input->post("name");
 		$data['emailid'] = $this->input->post("emailid");
 		$data['age'] = $this->input->post("age");
 		$data['number'] = $this->input->post("number");
 		$data['language'] = implode("|",$this->input->post("language"));
 		
-		
-		$target_dir = "uploads/";
-		$upload_image1 = md5($time.$user_id).".".strtolower(pathinfo($_FILES["fileToUpload"]['name'],PATHINFO_EXTENSION));
-		$target_file = $target_dir . $upload_image1;
-		$uploadOk = 1;
-		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-		// Check if image file is a actual image or fake image
-		if(!$imageFileType) {
-			$check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
-			if($check !== false) {
-				echo "File is an image - " . $check["mime"] . ".";
-				$uploadOk = 1;
-			} else {
-				echo "File is not an image.";
-				$uploadOk = 0;
+		$user_id = $this->session->userdata('userid');
+		if(($_FILES['fileToUpload']['name']) != ''){
+			$upload = $this->upload_file($_FILES, $user_id);
+			if($upload["err_code"] == 0){
+				print($upload["err_msg"]);
 				exit;
 			}
-		}
-		// Check if file already exists
-		if (file_exists($target_file)) {
-			echo "Sorry, file already exists.";
-			$uploadOk = 0;
-			exit;
-		}
-		// Check file size
-		if ($_FILES["fileToUpload"]["size"] > 5000000) {
-			echo "Sorry, your file is too large.";
-			$uploadOk = 0;
-			exit;
-		}
-		// Allow certain file formats
-		if($imageFileType != "jpg") {
-			echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
-			$uploadOk = 0;
-			exit;
-		}
-		// Check if $uploadOk is set to 0 by an error
-		if ($uploadOk == 0) {
-			echo "Sorry, your file was not uploaded.";
-			exit;
-		// if everything is ok, try to upload file
-		} else {
-			if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-				echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
-				$data['upload_image'] = $upload_image1;
-			} else {
-				echo "Sorry, there was an error uploading your file.";
-			}
+			$data['upload_image'] = $upload['file_name'];
 		}
 		
-		#print_r($data);
+		
 		$id = $this->input->post("id");
 		$this->db->where('id', $id);
 		$this->db->update('per_data', $data);
 		#print_r ($this->db->last_query());
-		#exit;
 		return true;
 	}
 	
@@ -380,62 +276,17 @@ class Login_model extends CI_Model{
 		$data['movie_name'] = $this->input->post("movie_name");
 		$data['user_id'] = $this->session->userdata('userid');
 		$user_id = $this->session->userdata('userid');
-		$time = time();
-	
-		$target_dir = "uploads/";
-		$movie_image= md5($time.$user_id).".".strtolower(pathinfo($_FILES["fileToUpload"]['name'],PATHINFO_EXTENSION));
-		$target_file = $target_dir . $movie_image;
-		$uploadOk = 1;
-		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-		// Check if image file is a actual image or fake image
-		#print_r($_FILES);exit;
-		#echo "==$imageFileType==";exit; 
-		if(!$imageFileType) {
-			$check = getimagesize($_FILES["fileToUpload"]["tmp_name"]);
-			if($check !== false) {
-				echo "File is an image - " . $check["mime"] . ".";
-				$uploadOk = 1;
-			} else {
-				echo "File is not an image.";
-				$uploadOk = 0;
+		if(($_FILES['fileToUpload']['name']) != ''){
+			$upload = $this->upload_file($_FILES, $user_id);
+			if($upload["err_code"] == 0){
+				print($upload["err_msg"]);
 				exit;
 			}
-		}
-		// Check if file already exists
-		if (file_exists($target_file)) {
-			echo "Sorry, file already exists.";
-			$uploadOk = 0;
-			exit;
-		}
-		// Check file size
-		if ($_FILES["fileToUpload"]["size"] > 5000000) {
-			echo "Sorry, your file is too large.";
-			$uploadOk = 0;
-			exit;
-		}
-		// Allow certain file formats
-		if($imageFileType != "jpg") {
-			echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
-			$uploadOk = 0;
-			exit;
-		}
-		// Check if $uploadOk is set to 0 by an error
-		if ($uploadOk == 0) {
-			echo "Sorry, your file was not uploaded.";
-			exit;
-		// if everything is ok, try to upload file
-		} else {
-			if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-				echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
-				$data['movie_image'] = $movie_image;
-			} else {
-				echo "Sorry, there was an error uploading your file.";
-				exit;
-			}
+			$data['movie_image'] = $upload['file_name'];
 		}
 		
 		$this->db->insert('movie_list', $data);
-		print_r ($this->db->last_query());
+		#print_r ($this->db->last_query());
 		return true;
 	}
 	
@@ -452,7 +303,7 @@ class Login_model extends CI_Model{
 	}
 	
 	public function edit_movie_list(){
-		print_r($_POST);
+		#print_r($_POST);
 		$user_id = $this->session->userdata('userid');
 		$movie_id = $this->input->post("movie_id");
 		$this->db->where('user_id', $user_id);
@@ -465,22 +316,26 @@ class Login_model extends CI_Model{
 	}
 	
 	public function save_edit_movie_data(){
-		print_r($_POST);
+		#print_r($_POST);
+		#print_r($_FILES);
 		$user_id = $this->session->userdata('userid');
-		$upload = $this->upload_file($_FILES, $user_id);
-		if($upload["err_code"] == 0){
-			print($upload["err_msg"]);
-			exit;
+		if(($_FILES['fileToUpload']['name']) != ''){
+			$upload = $this->upload_file($_FILES, $user_id);
+			if($upload["err_code"] == 0){
+				print($upload["err_msg"]);
+				exit;
+			}
+			$data['movie_image'] = $upload['file_name'];
 		}
 		
 		$data['from_date'] = $this->input->post("from_date");
 		$data['to_date'] = $this->input->post("to_date");
 		$data['movie_name'] = $this->input->post("movie_name");
-		$data['movie_image'] = $upload['file_name'];
 		
+		$this->db->set($data);
 		$this->db->where('movie_id', $this->input->post("movie_id"));
 		$this->db->where('user_id', $user_id);
-		$this->db->update('movie_list', $data);
+		$this->db->update('movie_list');
 		#print_r ($this->db->last_query());
 		return true;
 	}
